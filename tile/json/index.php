@@ -6,7 +6,7 @@ if(isset($_REQUEST['layer'])) $layer=$_REQUEST['layer'];
 $z = (int) $z;
 $x = (int) $x;
 $y = (int) $y;
-if ($z < 15 || $z > 21) die;
+if ($z < 5 || $z > 30) die;
 $DBHOST = "localhost";
 $DBDATABASE = "pedro";
 $DBUSER = "guest";
