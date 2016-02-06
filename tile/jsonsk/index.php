@@ -15,7 +15,7 @@ $DBPORT="6432";
 $CONNECT = pg_pconnect("host=$DBHOST dbname=$DBDATABASE password=$DBPASSWORD user=$DBUSER port=$DBPORT")
  or die("Databaze je down.");
 $set = pg_query($CONNECT,"set client_encoding to UNICODE;");
-$result = pg_query($CONNECT,"select jsontiles.jsontile(".$z.",".$x.",".$y.")");
+$result = pg_query($CONNECT,"select sk.jsontile(".$z.",".$x.",".$y.")");
 if (pg_num_rows($result) != 1) die;
 header('Content-Type: application/json; charset=utf-8');
 echo pg_result($result,0,"jsontile");
