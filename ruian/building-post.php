@@ -21,6 +21,13 @@ if (isset($_REQUEST["poznamka"])) $poznamka = pg_escape_string($_REQUEST["poznam
 //echo "Poznamka: ".$poznamka."<br>Duvod: ".$duvod."<br>Hlasit: ".$hlasit_cuzk."<br>";
 //var_dump($_REQUEST);die;
 
+// test zda neni na reklamaci
+$RESULT=pg_query($CONNECT,"select hlaseno from osmtables.neplatne_budovy where kod = ".$kod);
+if (pg_result($RESULT,0,"hlaseno") == "t") {
+    echo "<font size=\"5\"><b>Něco je divně.</b></font><br>\n";
+    die;
+}
+
 // delete
 if (isset($_REQUEST["delete"]) and !isset($_REQUEST["deleteit"])) die("<font size=\"5\"><b>Nezaškrtli jste potvrzovací checkbox.</b></font>");
 if (isset($_REQUEST["delete"]) and isset($_REQUEST["deleteit"])) {
@@ -38,8 +45,8 @@ else { // update or insert
 	duvod=".$duvod.
 	",hlasit_cuzk=".$hlasit_cuzk.
 	",poznamka='".$poznamka.
-	"',user_id=".$user_id.
-	",user_nick='".$user_nick."',datum=now()
+	"',zmenil_id=".$user_id.
+	",zmenil_nick='".$user_nick."',datum=now()
 	where kod=".$kod))
 	    echo "<font size=\"5\"><b>Něco je divně.</b></font><br>\n";
 	if (pg_affected_rows($RESULT) != 1) echo "<font size=\"5\"><b>Něco je divně.</b></font><br>\n";

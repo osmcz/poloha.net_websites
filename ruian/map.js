@@ -1,23 +1,7 @@
-<?php
-$zoom=8;
-$lat=49.7;
-$lon=15.45;
-if(isset($_REQUEST['zoom'])) $zoom=$_REQUEST['zoom'];
-if(isset($_REQUEST['lat'])) $lat=$_REQUEST['lat'];
-if(isset($_REQUEST['lon'])) $lon=$_REQUEST['lon'];
-if(isset($_REQUEST['layer'])) $layer=$_REQUEST['layer'];
-if (!is_numeric($zoom)) $zoom=8;
-if (!is_numeric($lat)) $lat=49.7;
-if (!is_numeric($lon)) $lon=15.45;
-//echo is_numeric(strpos(strtolower($layer),'p'));
-//die;
-?>
 <link rel="stylesheet" type="text/css" href="/leaflet/leaflet.css" />
 <script type="text/javascript" src="/leaflet/leaflet.js"></script>
-<div id="map" class="map" style="height: 100%">
+<div id="map" class="map" style="height: 300">
 <script>
-function openBuilding(x) {
-    window.open('/building.php?latlng='+x, 'Building', 'width=780, height=1200, resizable=yes, scrollbars=yes, location=no')};
 function initmap() {
         var osmAttr = '<span>&copy;</span><a href="http://mapapi.poloha.net/copyright"> přispěvatelé OpenStreetMap</a>',
 	    cuzkAttr = ' ČÚZK',
@@ -29,21 +13,24 @@ function initmap() {
 	    landuseUrl = 'http://tile.poloha.net/landuse/{z}/{x}/{y}.png';
 	    adresyUrl = 'http://tile.poloha.net/adresy/{z}/{x}/{y}.png';
 
+	var puvodnigeom = {
+	    "type": "Feature", "geometry": <?php echo(pg_result($resmap,0,"geom"))?>
+	};
+	var puvodnistyle = {
+	    "color": "#ff7800",
+	    "weight": 4,
+	    "opacity": 0.8,
+	    "fillopacity": 0.5
+	};
+
         var osm   = L.tileLayer(osmUrl, {minZoom: 0, maxZoom: 20, attribution: osmAttr}),
 	    parcely = L.tileLayer(parcelyUrl, {minZoom: 12, maxZoom: 20, attribution: cuzkAttr}),
 	    ulice = L.tileLayer(uliceUrl, {minZoom: 12, maxZoom: 20, attribution: cuzkAttr}),
 	    budovy = L.tileLayer(budovyUrl, {minZoom: 12, maxZoom: 20, attribution: cuzkAttr}),
 	    budovytodo = L.tileLayer(todobudovyUrl, {minZoom: 12, maxZoom: 20, attribution: cuzkAttr}),
 	    landuse = L.tileLayer(landuseUrl, {minZoom: 12, maxZoom: 20, attribution: cuzkAttr}),
-	    adresy = L.tileLayer(adresyUrl, {minZoom: 12, maxZoom: 20, attribution: cuzkAttr});
-
-	var lpis = L.tileLayer.wms('http://eagri.cz/public/app/wms/plpis.fcgi', {
-	    layers: 'LPIS_FB4_KOD',
-	    format: 'image/png',
-	    transparent: true,
-	    crs: L.CRS.EPSG4326,
-	    attribution: "eagri.cz"
-	});
+	    adresy = L.tileLayer(adresyUrl, {minZoom: 12, maxZoom: 20, attribution: cuzkAttr}),
+	    origin = L.geoJSON(puvodnigeom, {style: puvodnistyle});
 
 	var ortofoto = L.tileLayer.wms('http://geoportal.cuzk.cz/WMS_ORTOFOTO_PUB/service.svc/get', {
 	    layers: 'GR_ORTFOTORGB',
@@ -55,46 +42,42 @@ function initmap() {
 	    attribution: cuzkAttr
 	});
 
-	var map = L.map('map', {
-	    center: [<?php echo $lat.','.$lon;?>],
-	    zoom: <?php echo $zoom;?>,
-	    minZoom: 0,
-	    maxZoom: 20,
-	    layers: [osm
-		    <?php 
-		    if (is_numeric(strpos(strtolower($layer),'o'))) echo ",ortofoto";
-		    if (is_numeric(strpos(strtolower($layer),'l'))) echo ",landuse";
-		    if (is_numeric(strpos(strtolower($layer),'i'))) echo ",lpis";
-		    if (is_numeric(strpos(strtolower($layer),'p'))) echo ",parcely";
-		    if (is_numeric(strpos(strtolower($layer),'u'))) echo ",ulice";
-		    if (is_numeric(strpos(strtolower($layer),'b'))) echo ",budovy";
-		    if (is_numeric(strpos(strtolower($layer),'t'))) echo ",budovytodo";
-		    if (is_numeric(strpos(strtolower($layer),'a'))) echo ",adresy";
-		    ?>
-	    ]
-	});
-
-	    map.attributionControl.setPrefix('');
-
 	var overlays = {
 	    "Ortofoto": ortofoto,
 	    "RÚIAN lands": landuse,
-	    "LPIS": lpis,
 	    "Parcely": parcely,
 	    "Ulice": ulice,
 	    "Budovy": budovy,
 	    "Budovy-todo": budovytodo,
-	    "Adresy": adresy
+	    "Adresy": adresy,
+	    "Origin": origin
 	};
+
+	var map = L.map('map', {
+	    center: [<?php echo(pg_result($resmap,0,"y").",".pg_result($resmap,0,"x"))?>],
+	    zoom: 
+<?php $v_h=pg_result($resmap,0,"prozoom");
+if ($v_h < 10)
+    { echo "20"; }
+elseif ($v_h < 30)
+    { echo "19"; }
+elseif ($v_h < 50)
+    { echo "18"; }
+elseif ($v_h < 100)
+    { echo "17"; }
+else
+    { echo "16"; }
+;
+?>
+, 
+	    minZoom: 0,
+	    maxZoom: 20,
+	    layers: [osm,budovy,origin]
+	});
+        map.attributionControl.setPrefix('');
 
 	L.control.layers({},overlays).addTo(map);
 	L.control.scale({imperial: false}).addTo(map);
-
-map.on('click', function(e) {
-    openBuilding(e.latlng);
-});
-
-
 }
 initmap();
 </script>

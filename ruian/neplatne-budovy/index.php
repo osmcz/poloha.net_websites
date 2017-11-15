@@ -1,6 +1,6 @@
 <script>
 function openBuilding(x) {
-    window.open('/building.php?latlng='+x, 'Building', 'width=780, height=580, resizable=yes, scrollbars=yes, location=no')};
+    window.open('/building.php?latlng='+x, 'Building', 'width=780, height=1200, resizable=yes, scrollbars=yes, location=no')};
 </script>
 <?php
 
@@ -49,7 +49,7 @@ for ($i=0;$i<pg_num_rows($result);$i++)
     echo "</td>\n";
     echo("<td><a href=\"http://vdp.cuzk.cz/vdp/ruian/stavebniobjekty/".pg_result($result,$i,"kod")."\">".pg_result($result,$i,"kod")."</a></td>\n");
     echo("<td>".pg_result($result,$i,"user_nick")."</td>\n");
-    echo("<td>".pg_result($result,$i,"datum")."</td>\n");
+    echo("<td>".pg_result($result,$i,"zadano")."</td>\n");
     if (pg_result($result,$i,"existuje") == "t") {
 	echo("<td><a href=\"http://ruian.poloha.net/19/".str_replace(" ","/",pg_result($result,$i,"lokace"))."/B\">".pg_result($result,$i,"adresa")."</a></td>\n");
     }
@@ -58,7 +58,7 @@ for ($i=0;$i<pg_num_rows($result);$i++)
 	echo("<td></td>\n");
     }
     echo("<td><a href=\"http://mapapi.poloha.net/search?query=".pg_result($result,$i,"lokace")."\">".pg_result($result,$i,"lokace")."</a></td>\n");
-    echo("<td><a href=\"/building.php?kod=".pg_result($result,$i,"kod")."\" target=\"Building\" onclick=\"openBuilding()\">".pg_result($result,$i,"popis")."</a></td>\n");
+    echo("<td><a href=\"../building.php?kod=".pg_result($result,$i,"kod")."\" target=\"Building\" onclick=\"openBuilding()\">".pg_result($result,$i,"popis")."</a></td>\n");
     echo("<td>");
     if (pg_result($result,$i,"hlaseno") == "t") echo "<img src=\"task-complete.png\" title=\"Ohlášeno na ČÚZK\">";
     if (!(pg_result($result,$i,"hlaseno") == "t") and pg_result($result,$i,"hlasit_cuzk") == "t") echo "<img src=\"run-build.png\" title=\"Bude se hlásit na ČÚZK\">";
