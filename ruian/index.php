@@ -38,7 +38,7 @@ function initmap() {
 	    adresy = L.tileLayer(adresyUrl, {minZoom: 12, maxZoom: 20, attribution: cuzkAttr});
 
 	var lpis = L.tileLayer.wms('http://eagri.cz/public/app/wms/plpis.fcgi', {
-	    layers: 'LPIS_FB4_KOD',
+	    layers: 'LPIS_FB4,LPIS_FB4_KOD',
 	    format: 'image/png',
 	    transparent: true,
 	    crs: L.CRS.EPSG4326,
