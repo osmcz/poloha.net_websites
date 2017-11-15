@@ -160,4 +160,60 @@ if ($queryran) {
     }
 
 }
+
+$RESULT=pg_query($CONNECT,"select nl.*,d.popis from osmtables.neplatne_budovy_log nl left join osmtables.neplatne_budovy_duvod d on nl.new_duvod = d.id where nl.kod = ".$i_kod." order by nl.id");
+if (pg_num_rows($RESULT) > 1)
+    {
+	echo ("<hr><b>Historie změn:</b><br>\n<table border=1><thead><tr><th>Akce</th><th>Datum</th><th>Nick</th><th>Důvod</th><th>Hlásit</th><th>Hlášeno</th><th>Poznámka</th></tr></thead>");
+	for ($i=0;$i<pg_num_rows($RESULT);$i++)
+	    {
+		echo ("<tr><td>");
+		switch (pg_result($RESULT,$i,"action"))
+		    {
+			case "I": echo ("Založení");break;
+			case "U": echo ("Změna");break;
+			case "D": echo ("Smazání");break;
+		    }
+		echo ("</td>\n");
+		echo ("<td>".pg_result($RESULT,$i,"new_datum")."</td><td>".pg_result($RESULT,$i,"new_user_nick")."</td>\n");
+		echo ("<td>");
+		if (pg_result($RESULT,$i,"old_duvod") != pg_result($RESULT,$i,"new_duvod"))
+		{
+		    echo (pg_result($RESULT,$i,"popis"));
+		}
+		echo ("</td>\n");
+		echo ("<td>");
+		if (pg_result($RESULT,$i,"old_hlasit_cuzk") != pg_result($RESULT,$i,"new_hlasit_cuzk"))
+		{
+		    if (pg_result($RESULT,$i,"new_hlasit_cuzk") == "t")
+			{ echo ("ANO");
+			}
+		    else
+			{ echo ("NE");
+			}
+		}
+		echo ("</td>\n");
+		echo ("<td>");
+		if (pg_result($RESULT,$i,"old_hlaseno") != pg_result($RESULT,$i,"new_hlaseno"))
+		{
+		    if (pg_result($RESULT,$i,"new_hlaseno") == "t")
+			{ echo ("ANO");
+			}
+		    else
+			{ echo ("NE");
+			}
+		}
+		echo ("</td>\n");
+		echo ("<td>");
+		if (pg_result($RESULT,$i,"old_poznamka") != pg_result($RESULT,$i,"new_poznamka"))
+		{
+		    echo (pg_result($RESULT,$i,"new_poznamka"));
+		}
+		echo ("</td>\n");
+		echo ("</tr>\n");
+	    }
+	echo ("</table><hr>\n");
+
+    }
+
 ?>
