@@ -33,11 +33,14 @@ if (isset($_REQUEST['latlng'])) {
     $lon = (float) $lon;
     $RESULT=pg_query($CONNECT,"
 	select so.kod,nb.zadano,nb.user_nick,nb.datum,nb.duvod,zv.nazev,ruian.adresa_budovy(so.kod),
-	    duvod.popis,nb.poznamka,nb.hlasit_cuzk,nb.hlaseno,nb.zmenil_nick
+	    duvod.popis,nb.poznamka,nb.hlasit_cuzk,nb.hlaseno,nb.zmenil_nick,
+	    parcela.kmenove_cislo || case when parcela.poddeleni_cisla is not NULL then '/' || parcela.poddeleni_cisla else '' end as parcela,
+	    parcela.id as parcela_id
 	from ruian.rn_stavebni_objekt so
 	left join osmtables.neplatne_budovy nb on so.kod=nb.kod
 	left join osmtables.neplatne_budovy_duvod duvod on nb.duvod=duvod.id
 	left join osmtables.zpusob_vyuziti_objektu zv on so.zpusob_vyuziti_kod=zv.kod
+	left join ruian.rn_parcela parcela on so.identifikacni_parcela_id = parcela.id
 	where st_intersects(st_transform(st_setsrid(st_makepoint(".$lon.",".$lat."),4326),900913),so.hranice)
 	and not so.deleted
 	limit 1
@@ -48,11 +51,14 @@ if (isset($_REQUEST['kod'])) {
     $kod= (int) $_REQUEST['kod'];
     $RESULT=pg_query($CONNECT,"
 	select so.kod,nb.zadano,nb.user_nick,nb.datum,nb.duvod,zv.nazev,ruian.adresa_budovy(so.kod),
-	    duvod.popis,nb.poznamka,nb.hlasit_cuzk,nb.hlaseno,nb.zmenil_nick
+	    duvod.popis,nb.poznamka,nb.hlasit_cuzk,nb.hlaseno,nb.zmenil_nick,
+	    parcela.kmenove_cislo || case when parcela.poddeleni_cisla is not NULL then '/' || parcela.poddeleni_cisla else '' end as parcela,
+	    parcela.id as parcela_id
 	from ruian.rn_stavebni_objekt so
 	left join osmtables.neplatne_budovy nb on so.kod=nb.kod
 	left join osmtables.neplatne_budovy_duvod duvod on nb.duvod=duvod.id
 	left join osmtables.zpusob_vyuziti_objektu zv on so.zpusob_vyuziti_kod=zv.kod
+	left join ruian.rn_parcela parcela on so.identifikacni_parcela_id = parcela.id
 	where so.kod=".$kod." and not so.deleted
 	limit 1
     ");
@@ -85,7 +91,11 @@ if ($queryran) {
     $nazev=pg_result($RESULT,0,"nazev");
     $hlasit_cuzk=pg_result($RESULT,0,"hlasit_cuzk");
     $hlaseno=pg_result($RESULT,0,"hlaseno");
-    echo "SO: ".$i_kod." (".$nazev.")<br>".$adresa."<hr>\n";
+    $parcela=pg_result($RESULT,0,"parcela");
+    $parcela_id=pg_result($RESULT,0,"parcela_id");
+    echo "SO: ".$i_kod." (".$nazev.")";
+    if ($parcela != '') echo " na parcele ".$parcela." (".$parcela_id.")";
+    echo "<br>".$adresa."<hr>\n";
     if ($i_user_nick != "")
 	{ echo "Zadal(a): ".$i_user_nick." dne ".$datum;
 	if ($zmenil != "")
