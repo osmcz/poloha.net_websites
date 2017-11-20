@@ -45,6 +45,15 @@ function initmap() {
 	    attribution: "eagri.cz"
 	});
 
+	var km = L.tileLayer.wms('http://wms.cuzk.cz/wms.asp', {
+	    layers: 'parcelni_cisla_i,DEF_BUDOVY,KN_I',
+	    format: 'image/png',
+	    transparent: true,
+	    crs: L.CRS.EPSG4326,
+	    maxZoom: 20,
+	    attribution: ' ČÚZK'
+	});
+
 	var ortofoto = L.tileLayer.wms('http://geoportal.cuzk.cz/WMS_ORTOFOTO_PUB/service.svc/get', {
 	    layers: 'GR_ORTFOTORGB',
 	    format: 'image/jpeg',
@@ -63,6 +72,7 @@ function initmap() {
 	    layers: [osm
 		    <?php 
 		    if (is_numeric(strpos(strtolower($layer),'o'))) echo ",ortofoto";
+		    if (is_numeric(strpos(strtolower($layer),'k'))) echo ",km";
 		    if (is_numeric(strpos(strtolower($layer),'l'))) echo ",landuse";
 		    if (is_numeric(strpos(strtolower($layer),'i'))) echo ",lpis";
 		    if (is_numeric(strpos(strtolower($layer),'p'))) echo ",parcely";
@@ -78,6 +88,7 @@ function initmap() {
 
 	var overlays = {
 	    "Ortofoto": ortofoto,
+	    "KM": km,
 	    "RÚIAN lands": landuse,
 	    "LPIS": lpis,
 	    "Parcely": parcely,
