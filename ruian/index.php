@@ -50,6 +50,7 @@ function initmap() {
 	    format: 'image/png',
 	    transparent: true,
 	    crs: L.CRS.EPSG4326,
+	    minZoom: 17,
 	    maxZoom: 20,
 	    attribution: ' ČÚZK'
 	});
